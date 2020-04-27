@@ -1,0 +1,21 @@
+{
+  "name": "dnd",
+  "version": "1.0.0",
+  "description": "drag and drop library",
+  "scripts": {
+    "dev": "webpack-dev-server --config webpack.dev.config.js",
+    "build-dev": "webpack --config webpack.dev.config.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "html-webpack-harddisk-plugin": "^1.0.1",
+    "html-webpack-plugin": "^4.2.0",
+    "lit-element": "^2.3.1",
+    "ts-loader": "^7.0.1",
+    "typescript": "^3.8.3",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  }
+}
