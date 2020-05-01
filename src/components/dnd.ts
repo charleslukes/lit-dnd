@@ -10,68 +10,60 @@ import { dndStyles } from "./dndStyles";
 
 @customElement("drag-n-drop")
 export class DragAndDrop extends LitElement {
-  private isSelected: boolean;
-  private tagSelected: any;
-
   static get styles(): CSSResult {
     return dndStyles;
   }
 
   firstUpdated() {
-    this.getAllSlotedTemplate();
+    this.dragAndDropOnDoc();
   }
 
-  getAllSlotedTemplate(): void {
-    const slot = this.shadowRoot.querySelector("slot");
-    console.log(slot.assignedElements());
+  dragAndDropOnDoc(): void {
+    let isSelected: boolean,
+      elemSelected: any,
+      startX: number = 0,
+      startY: number = 0;
 
-    slot.assignedElements().forEach((elem) => {
-      elem.addEventListener("mousedown", (e: any) => {
-        e.preventDefault();
-        this.isSelected = true;
-        this.tagSelected = e.target;
-      });
+    const doc = document.querySelector("body");
+    doc.addEventListener("mousedown", (e: MouseEvent) => {
+      e.preventDefault();
+      // get targeted element
+      const target = e.target as HTMLElement;
+      if (target.assignedSlot) {
+        elemSelected = target;
+        isSelected = true;
 
-      elem.addEventListener("mouseup", (e: any) => {
-        this.isSelected = false;
-        console.log("invoked");
-      });
+        let initalX = target.getAttribute("data-positionX")
+          ? Number(target.getAttribute("data-positionX"))
+          : 0;
+        let initalY = target.getAttribute("data-positionY")
+          ? Number(target.getAttribute("data-positionY"))
+          : 0;
 
-      elem.addEventListener("mousemove", (e: any) => {
-        e.preventDefault();
-        const target = e.target;
-        console.log(target, this.tagSelected);
-
-        if (this.isSelected && target === this.tagSelected) {
-          // get the left coordinates
-          const leftX = e.pageX;
-          const rightY = e.pageY;
-          target.style.transform = `translate(${leftX}px, ${rightY}px)`;
-        }
-      });
+        startX = e.pageX - initalX;
+        startY = e.pageY - initalY;
+      }
     });
 
-    // elem.addEventListener("mousedown", (e: any) => {
-    //   this.isSelected = true;
-    //   this.tagSelected = e.target;
-    // });
+    doc.addEventListener("mousemove", (e: MouseEvent) => {
+      e.preventDefault();
+      const target = e.target as HTMLElement;
+      if (isSelected && target === elemSelected) {
+        const leftX = e.pageX - startX;
+        const rightY = e.pageY - startY;
 
-    // slot.addEventListener("mouseup", (e: any) => {
-    //   this.isSelected = false;
-    //   console.log("invoked");
-    // });
+        target.style.transform = `translate(${leftX}px, ${rightY}px)`;
 
-    // slot.addEventListener("mousemove", (e: any) => {
-    //   const target = e.target;
-    //   console.log(target, this.tagSelected);
+        // save their last postion
+        target.setAttribute(`data-positionX`, `${leftX}`);
+        target.setAttribute(`data-positionY`, `${rightY}`);
+      }
+    });
 
-    //   if (this.isSelected && target === this.tagSelected) {
-    //     // get the left coordinates
-    //     const leftX = e.pageX;
-    //     const rightY = e.pageY;
-    //     target.style.transform = `translate(${leftX}px, ${rightY}px)`;
-    //   }
-    // });
+    doc.addEventListener("mouseup", (e) => {
+      e.preventDefault();
+      isSelected = false;
+    });
   }
 
   render(): TemplateResult {
