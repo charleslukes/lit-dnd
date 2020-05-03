@@ -10,6 +10,8 @@ import { dndStyles } from "./dndStyles";
 
 @customElement("drag-n-drop")
 export class DragAndDrop extends LitElement {
+  @property({ type: Boolean, reflect: true }) dndDraggable: boolean;
+
   static get styles(): CSSResult {
     return dndStyles;
   }
@@ -22,7 +24,8 @@ export class DragAndDrop extends LitElement {
     let isSelected: boolean,
       elemSelected: any,
       startX: number = 0,
-      startY: number = 0;
+      startY: number = 0,
+      droppableElem: any;
 
     const doc = document.querySelector("body");
     doc.addEventListener("mousedown", (e: MouseEvent) => {
@@ -52,6 +55,13 @@ export class DragAndDrop extends LitElement {
         const leftX = e.pageX - startX;
         const rightY = e.pageY - startY;
 
+        // get the element at which mouseover
+        target.hidden = true;
+        droppableElem = document.elementFromPoint(leftX, rightY);
+        console.log(droppableElem);
+
+        target.hidden = false;
+
         target.style.transform = `translate(${leftX}px, ${rightY}px)`;
 
         // save their last postion
@@ -60,8 +70,20 @@ export class DragAndDrop extends LitElement {
       }
     });
 
-    doc.addEventListener("mouseup", (e) => {
+    doc.addEventListener("mouseup", (e: any) => {
       e.preventDefault();
+
+      // drop it to it original position if container isnt droppable
+      if (droppableElem && droppableElem.classList.contains("drag-container")) {
+        elemSelected.style.transform = `translate(${0}px, ${0}px)`;
+        droppableElem.appendChild(elemSelected);
+      } else {
+        // go back to default position
+        elemSelected.style.transform = `translate(${0}px, ${0}px)`;
+        elemSelected.setAttribute(`data-positionX`, `${0}`);
+        elemSelected.setAttribute(`data-positionY`, `${0}`);
+      }
+
       isSelected = false;
     });
   }
